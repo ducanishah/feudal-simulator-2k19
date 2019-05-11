@@ -31,22 +31,27 @@ var config = {
 };
 var person;
 var cursors;
+const maxFoodCount=1;
 var game = new Phaser.Game(config);
 function preload ()
 {
-    
+    this.load.image('food','assets/health_pot.png');
+    this.load.image('dude','assets/hat-guy.png')
 }
 function create ()
 {
     //TODO The  person and its settings
     person = this.physics.add.sprite(100, 450, 'dude');
-    //  person physics properties. Give the little guy a slight bounce.
+    //  person physics properties
     person.setCollideWorldBounds(true);
+    //Make foods group
+    var foodGroup= this.physics.add.group();
     //  Input Events
     cursors = this.input.keyboard.createCursorKeys();
 }
 function update ()
 {
+    //Movement code
     if (cursors.left.isDown && !cursors.right.isDown)
     {
         person.setVelocityX(-160);
@@ -71,8 +76,15 @@ function update ()
     {
         person.setVelocityY(0);
     }
+
+    
 }
 
+
+    
+// function randomXY(){
+//     return [400,300];
+// }
 </script>
 
 </body>
