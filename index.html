@@ -45,9 +45,18 @@ function create ()
     //  person physics properties
     person.setCollideWorldBounds(true);
     //Make foods group
-    var foodGroup= this.physics.add.group();
+    var foodGroup= this.physics.add.group({
+            key:'food', 
+            setXY: {
+                    x:400,
+                    y:300
+                }
+            }
+    );
     //  Input Events
     cursors = this.input.keyboard.createCursorKeys();
+    //Colliders and such
+    // this.physics.add.Overlap(person,foodGroup,collectFood,null,this);
 }
 function update ()
 {
@@ -77,10 +86,11 @@ function update ()
         person.setVelocityY(0);
     }
 
-    
 }
 
+// function collectFood() {
 
+// }
     
 // function randomXY(){
 //     return [400,300];
