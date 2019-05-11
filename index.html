@@ -1,0 +1,79 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>Feudal Simulator 2k19</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+var config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    physics: {
+        default: 'arcade',
+        arcade: {
+            debug: false
+        }
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+var person;
+var cursors;
+var game = new Phaser.Game(config);
+function preload ()
+{
+    
+}
+function create ()
+{
+    //TODO The  person and its settings
+    person = this.physics.add.sprite(100, 450, 'dude');
+    //  person physics properties. Give the little guy a slight bounce.
+    person.setCollideWorldBounds(true);
+    //  Input Events
+    cursors = this.input.keyboard.createCursorKeys();
+}
+function update ()
+{
+    if (cursors.left.isDown && !cursors.right.isDown)
+    {
+        person.setVelocityX(-160);
+    }
+    else if (cursors.right.isDown && !cursors.left.isDown)
+    {
+        person.setVelocityX(160);
+    }
+    else
+    {
+        person.setVelocityX(0);
+    }
+    if (cursors.up.isDown && !cursors.down.isDown)
+    {
+        person.setVelocityY(-160);
+    }
+    else if (cursors.down.isDown && !cursors.up.isDown)
+    {
+        person.setVelocityY(160);
+    }
+    else 
+    {
+        person.setVelocityY(0);
+    }
+}
+
+</script>
+
+</body>
+</html>
