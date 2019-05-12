@@ -34,6 +34,7 @@
         var person;
         var cursors;
         var foodGroup;
+        var personGroup;
         const speed=20;
         const maxFoodCount = 1;
         var game = new Phaser.Game(config);
@@ -42,9 +43,9 @@
             this.load.image('dude', 'assets/hat-guy.png')
         }
         function create() {
+            personGroup=this.physics.add.group();
             //TODO The  person and its settings
             person = this.physics.add.sprite(100, 450, 'dude');
-            //  person physics properties
             person.setCollideWorldBounds(true);
             //Make foods group
             foodGroup = this.physics.add.group({
@@ -93,6 +94,10 @@
             food.disableBody(true, true);
         }
 
+        function Person (x,y,thisFoodCount) {
+            Phaser.Sprite.call(this,x,y,'dude');
+            this.foodCount=thisFoodCount;
+        }
 // function randomXY(){
 //     return [400,300];
 // }
