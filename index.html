@@ -46,7 +46,7 @@
             personGroup=this.physics.add.group();
             //TODO The  person and its settings
             person = this.physics.add.sprite(100, 450, 'dude');
-            person.setCollideWorldBounds(true);
+            // person.setCollideWorldBounds(true);
             //Make foods group
             foodGroup = this.physics.add.group({
                 key: 'food',
@@ -60,6 +60,7 @@
             cursors = this.input.keyboard.createCursorKeys();
             //Colliders and such
             this.physics.add.overlap(person, foodGroup, collectFood, null, this);
+            
         }
         function update() {
             //Movement code
