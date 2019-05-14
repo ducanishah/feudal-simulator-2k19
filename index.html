@@ -63,13 +63,13 @@
                     this.foodCount -= 1;
                     this.foodDecrementTime += foodDecrementInterval;
                 }
-                // console.log(time)
+                if (this.foodCount <= 0) {
+                    this.disableBody(true, true);
+                    this.text.setText('');
+                }
             }
             update(time, delta) {
-                //TODO
-
                 var foodsToCheck = foodGroup.children.entries.filter((child) => {
-                    // console.log(child); 
                     return child.active === true;
                 })
                 let closestFood = foodsToCheck[0];
@@ -100,8 +100,8 @@
             // personGroup.add(newPerson)
 
             foodGroup = this.physics.add.group({
-                defaultKey:'food',
-                classType:Phaser.Physics.Arcade.Sprite
+                defaultKey: 'food',
+                classType: Phaser.Physics.Arcade.Sprite
             });
             // foodGroup.add(this.physics.add.sprite(100, 100, 'food'));
             // console.log(foodGroup.children)
@@ -125,7 +125,7 @@
                 people += 1;
             }
 
-            createFood(this,this.time.now);
+            createFood(this, this.time.now);
         }
 
         function collectFood(person, food) {
@@ -133,16 +133,15 @@
             person.foodCount += 1;
         }
 
-        function createFood(scene,time) {
+        function createFood(scene, time) {
             if (time > foodCreateTime) {
-                if (foodGroup.getFirstDead()) {
+                if (foodGroup.getFirstDead()!==null) {
                     foodGroup.getFirstDead().enableBody(true, Phaser.Math.Between(0, 800), Phaser.Math.Between(0, 600), true, true)
                 }
                 else {
-                    console.log("new food!")
                     foodGroup.create(...randomXY());
                 }
-                foodCreateTime+=foodCreateInterval;
+                foodCreateTime += foodCreateInterval;
             }
         }
 
