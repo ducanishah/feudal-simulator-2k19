@@ -46,7 +46,7 @@
 
         //CUSTOM CLASSES HERE
         class Person extends Phaser.Physics.Arcade.Sprite {
-            constructor(scene, x, y, thisFoodCount = 5) {
+            constructor(scene, x, y, thisFoodCount) {
                 super(scene, x, y, 'dude');
                 //PHYSICS ME
                 scene.sys.updateList.add(this);
@@ -98,19 +98,14 @@
             this.load.image('dude', 'assets/hat-guy.png')
         }
         function create() {
-            personGroup = this.physics.add.group({ runChildUpdate: true });
-            // let newPerson = new Person(this, 400,300);
-            // personGroup.add(newPerson)
+
+            personGroup = this.physics.add.group({ runChildUpdate: true, classType:Person });
 
             foodGroup = this.physics.add.group({
                 defaultKey: 'food',
                 classType: Phaser.Physics.Arcade.Sprite
             });
-            // foodGroup.add(this.physics.add.sprite(100, 100, 'food'));
-            // console.log(foodGroup.children)
-            //  Input Events
-            // cursors = this.input.keyboard.createCursorKeys();
-
+            
             //Colliders and such
             this.physics.add.overlap(personGroup, foodGroup, collectFood, null, this);
             this.physics.add.collider(personGroup, personGroup);
@@ -118,8 +113,7 @@
         }
         function update() {
             if (people < 2) {
-                let newPerson = new Person(this, ...randomXY());
-                personGroup.add(newPerson)
+                createPerson(...randomXY());
                 //     // var newPerson = personGroup.get();
                 //     // if (newPerson) 
                 //     //     person.enableBody(true, 100, 450, true, true)
@@ -145,6 +139,15 @@
                     foodGroup.create(...randomXY());
                 }
                 foodCreateTime += foodCreateInterval;
+            }
+        }
+
+        function createPerson(x,y,iFoodCount=5){
+            if (personGroup.getFirstDead()!==null){
+                let duder= personGroup.getFirstDead().enableBody(true,x,y,true,true);
+            } 
+            else {
+                personGroup.create(x,y,iFoodCount);
             }
         }
 
