@@ -31,24 +31,61 @@
                 update: update
             }
         };
-        var person;
+        // var person;
         var cursors;
         var foodGroup;
-        var personGroup;
-        const speed=20;
-        const maxFoodCount = 1;
+        const speed = 100;
+        const maxFoodCount = 2;
+        var i = 0;
         var game = new Phaser.Game(config);
         function preload() {
             this.load.image('food', 'assets/health_pot.png');
             this.load.image('dude', 'assets/hat-guy.png')
         }
+
+        //CUSTOM CLASSES HERE
+        class Person extends Phaser.Physics.Arcade.Sprite {
+            constructor(scene, x, y, thisFoodCount = 5) {
+                super(scene, x, y, 'dude');
+                scene.sys.updateList.add(this);
+                scene.sys.displayList.add(this);
+                scene.physics.world.enableBody(this);
+                this.foodCount = thisFoodCount;
+            }
+            update(time, delta) {
+                let closestFood=foodGroup.children.entries[0];
+                foodGroup.children.iterate((child)=>{
+                    if(Phaser.Math.Distance.Between(this.x,this.y,child.x,child.y)<Phaser.Math.Distance.Between(this.x,this.y,closestFood.x,closestFood.y))
+                    {
+                        closestFood=child
+                    }
+                })
+                this.setVelocity(
+                    Math.cos( Phaser.Math.Angle.Between (this.x,this.y,closestFood.x,closestFood.y))*speed,
+                    Math.sin(Phaser.Math.Angle.Between(this.x,this.y,closestFood.x,closestFood.y))*speed
+                    )
+            }
+        }
+
         function create() {
-            personGroup=this.physics.add.group();
+            personGroup = this.physics.add.group({ runChildUpdate: true });
             //TODO The  person and its settings
-            person = this.physics.add.sprite(100, 450, 'dude');
+            // person = this.physics.add.sprite(100, 450, 'dude');
+            // personGroup.add(new Person())
             // person.setCollideWorldBounds(true);
             //Make foods group
+            var people = 0;
+            if (!people) {
+                let newPerson = new Person(this, 200, 450);
+                personGroup.add(newPerson)
+                // var newPerson=personGroup.get(); 
+                // if (newPerson){
+                //     person.enableBody(true,100,450,true,true)
+                people = 1;
+                // }
+            }
             foodGroup = this.physics.add.group({
+                defaultKey:'food',
                 key: 'food',
                 setXY: {
                     x: 400,
@@ -56,38 +93,39 @@
                 }
             }
             );
+            foodGroup.create(100,200);
             //  Input Events
             cursors = this.input.keyboard.createCursorKeys();
             //Colliders and such
-            this.physics.add.overlap(person, foodGroup, collectFood, null, this);
-            
+            this.physics.add.overlap(personGroup, foodGroup, collectFood, null, this);
+
         }
         function update() {
             //Movement code
-            if (cursors.left.isDown && !cursors.right.isDown) {
-                person.setVelocityX(-10*speed);
-            }
-            else if (cursors.right.isDown && !cursors.left.isDown) {
-                person.setVelocityX(10*speed);
-            }
-            else {
-                person.setVelocityX(0);
-            }
-            if (cursors.up.isDown && !cursors.down.isDown) {
-                person.setVelocityY(-10*speed);
-            }
-            else if (cursors.down.isDown && !cursors.up.isDown) {
-                person.setVelocityY(10*speed);
-            }
-            else {
-                person.setVelocityY(0);
-            }
+            // if (cursors.left.isDown && !cursors.right.isDown) {
+            //     person.setVelocityX(-10*speed);
+            // }
+            // else if (cursors.right.isDown && !cursors.left.isDown) {
+            //     person.setVelocityX(10*speed);
+            // }
+            // else {
+            //     person.setVelocityX(0);
+            // }
+            // if (cursors.up.isDown && !cursors.down.isDown) {
+            //     person.setVelocityY(-10*speed);
+            // }
+            // else if (cursors.down.isDown && !cursors.up.isDown) {
+            //     person.setVelocityY(10*speed);
+            // }
+            // else {
+            //     person.setVelocityY(0);
+            // }
 
 
-            if(foodGroup.countActive(true)<maxFoodCount) {
-                foodGroup.children.iterate((child) => {
-                    child.enableBody(true,Phaser.Math.Between(0,800),Phaser.Math.Between(0,600),true,true)
-                })
+            if (foodGroup.getFirstDead()) {
+                
+                foodGroup.getFirstDead().enableBody(true, Phaser.Math.Between(0, 800), Phaser.Math.Between(0, 600), true, true)
+                
             }
         }
 
@@ -95,10 +133,7 @@
             food.disableBody(true, true);
         }
 
-        function Person (x,y,thisFoodCount) {
-            Phaser.Sprite.call(this,x,y,'dude');
-            this.foodCount=thisFoodCount;
-        }
+
 // function randomXY(){
 //     return [400,300];
 // }
