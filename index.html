@@ -33,7 +33,6 @@
         };
         //#region global vars
         var people = 0;
-        var cursors;
         var foodGroup;
         const speed = 100;
         const foodDecrementInterval = 5000;
@@ -98,7 +97,6 @@
             this.load.image('dude', 'assets/hat-guy.png')
         }
         function create() {
-
             personGroup = this.physics.add.group({ runChildUpdate: true, classType:Person });
 
             foodGroup = this.physics.add.group({
@@ -152,7 +150,7 @@
         }
 
         function randomXY() {
-            return [Phaser.Math.Between(0, 800), Phaser.Math.Between(0, 600)];
+            return [Phaser.Math.Between(0, game.canvas.width), Phaser.Math.Between(0, game.canvas.height)];
         }
     </script>
 
