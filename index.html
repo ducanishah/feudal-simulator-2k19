@@ -31,7 +31,7 @@
                 update: update
             }
         };
-        // var person;
+        //#region global vars
         var people = 0;
         var cursors;
         var foodGroup;
@@ -42,18 +42,17 @@
         var foodCreateTime;
         var i = 0;
         var game = new Phaser.Game(config);
-        function preload() {
-            this.load.image('food', 'assets/health_pot.png');
-            this.load.image('dude', 'assets/hat-guy.png')
-        }
+        //#endregion 
 
         //CUSTOM CLASSES HERE
         class Person extends Phaser.Physics.Arcade.Sprite {
             constructor(scene, x, y, thisFoodCount = 5) {
                 super(scene, x, y, 'dude');
+                //PHYSICS ME
                 scene.sys.updateList.add(this);
                 scene.sys.displayList.add(this);
                 scene.physics.world.enableBody(this);
+                //Them vars them vars them varry vars
                 this.foodCount = thisFoodCount;
                 this.text = scene.add.text(this.x, this.y, this.foodCount);
                 this.foodDecrementTime = scene.time.now + foodDecrementInterval;
@@ -94,6 +93,10 @@
 
         }
 
+        function preload() {
+            this.load.image('food', 'assets/health_pot.png');
+            this.load.image('dude', 'assets/hat-guy.png')
+        }
         function create() {
             personGroup = this.physics.add.group({ runChildUpdate: true });
             // let newPerson = new Person(this, 400,300);
