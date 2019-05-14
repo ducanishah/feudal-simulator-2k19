@@ -32,6 +32,7 @@
             }
         };
         // var person;
+        var people = 0;
         var cursors;
         var foodGroup;
         const speed = 100;
@@ -51,41 +52,31 @@
                 scene.sys.displayList.add(this);
                 scene.physics.world.enableBody(this);
                 this.foodCount = thisFoodCount;
+                this.text = scene.add.text(this.x, this.y, this.foodCount);
             }
             update(time, delta) {
-                let closestFood=foodGroup.children.entries[0];
-                foodGroup.children.iterate((child)=>{
-                    if(Phaser.Math.Distance.Between(this.x,this.y,child.x,child.y)<Phaser.Math.Distance.Between(this.x,this.y,closestFood.x,closestFood.y))
-                    {
-                        closestFood=child
+                let closestFood = foodGroup.children.entries[0];
+                foodGroup.children.iterate((child) => {
+                    if (Phaser.Math.Distance.Between(this.x, this.y, child.x, child.y) < Phaser.Math.Distance.Between(this.x, this.y, closestFood.x, closestFood.y)) {
+                        closestFood = child
                     }
                 })
                 this.setVelocity(
-                    Math.cos( Phaser.Math.Angle.Between (this.x,this.y,closestFood.x,closestFood.y))*speed,
-                    Math.sin(Phaser.Math.Angle.Between(this.x,this.y,closestFood.x,closestFood.y))*speed
-                    )
+                    Math.cos(Phaser.Math.Angle.Between(this.x, this.y, closestFood.x, closestFood.y)) * speed,
+                    Math.sin(Phaser.Math.Angle.Between(this.x, this.y, closestFood.x, closestFood.y)) * speed
+                )
+                this.text.setText(this.foodCount);
+                this.text.setPosition(this.x + 10, this.y - 5);
             }
         }
 
         function create() {
             personGroup = this.physics.add.group({ runChildUpdate: true });
-            //TODO The  person and its settings
-            // person = this.physics.add.sprite(100, 450, 'dude');
-            // personGroup.add(new Person())
-            // person.setCollideWorldBounds(true);
-            //Make foods group
-            var people = 0;
-            if (!people) {
-                let newPerson = new Person(this, 200, 450);
-                personGroup.add(newPerson)
-                // var newPerson=personGroup.get(); 
-                // if (newPerson){
-                //     person.enableBody(true,100,450,true,true)
-                people = 1;
-                // }
-            }
+            // let newPerson = new Person(this, 400,300);
+            // personGroup.add(newPerson)
+            
             foodGroup = this.physics.add.group({
-                defaultKey:'food',
+                defaultKey: 'food',
                 key: 'food',
                 setXY: {
                     x: 400,
@@ -93,50 +84,43 @@
                 }
             }
             );
-            foodGroup.create(100,200);
+            foodGroup.create(100, 200);
             //  Input Events
-            cursors = this.input.keyboard.createCursorKeys();
+            // cursors = this.input.keyboard.createCursorKeys();
+            
             //Colliders and such
             this.physics.add.overlap(personGroup, foodGroup, collectFood, null, this);
+            this.physics.add.collider(personGroup,personGroup);
 
         }
         function update() {
-            //Movement code
-            // if (cursors.left.isDown && !cursors.right.isDown) {
-            //     person.setVelocityX(-10*speed);
-            // }
-            // else if (cursors.right.isDown && !cursors.left.isDown) {
-            //     person.setVelocityX(10*speed);
-            // }
-            // else {
-            //     person.setVelocityX(0);
-            // }
-            // if (cursors.up.isDown && !cursors.down.isDown) {
-            //     person.setVelocityY(-10*speed);
-            // }
-            // else if (cursors.down.isDown && !cursors.up.isDown) {
-            //     person.setVelocityY(10*speed);
-            // }
-            // else {
-            //     person.setVelocityY(0);
-            // }
-
+            if (people < 2) {
+                let newPerson = new Person(this, ...randomXY());
+                personGroup.add(newPerson)
+            //     // var newPerson = personGroup.get();
+            //     // if (newPerson) {
+            //     //     person.enableBody(true, 100, 450, true, true)
+                    
+            //     // }
+                people+=1;
+            }
 
             if (foodGroup.getFirstDead()) {
-                
+
                 foodGroup.getFirstDead().enableBody(true, Phaser.Math.Between(0, 800), Phaser.Math.Between(0, 600), true, true)
-                
+
             }
         }
 
         function collectFood(person, food) {
             food.disableBody(true, true);
+            person.foodCount += 1;
         }
 
 
-// function randomXY(){
-//     return [400,300];
-// }
+        function randomXY() {
+            return [Phaser.Math.Between(0, 800), Phaser.Math.Between(0, 600)];
+        }
     </script>
 
 </body>
