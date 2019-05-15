@@ -13,167 +13,182 @@
 </head>
 
 <body>
-<div id="game-container"> 
-    <script type="text/javascript">
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-        //Dead space here
-        var config = {
-            type: Phaser.AUTO,
-            scale:{
-                mode:Phaser.Scale.RESIZE,
-                parent:'game-container',
-                width:'100%',
-                height:'100%'
-            },
-            physics: {
-                default: 'arcade',
-                arcade: {
-                    debug: false
+    <div id="game-container">
+        <script type="text/javascript">
+            //
+            //
+            //
+            //
+            //
+            //
+            //
+            //
+            //
+            //Dead space here
+            var config = {
+                type: Phaser.AUTO,
+                scale: {
+                    mode: Phaser.Scale.RESIZE,
+                    parent: 'game-container',
+                    width: '100%',
+                    height: '100%'
+                },
+                physics: {
+                    default: 'arcade',
+                    arcade: {
+                        debug: false
+                    }
+                },
+                scene: {
+                    preload: preload,
+                    create: create,
+                    update: update
                 }
-            },
-            scene: {
-                preload: preload,
-                create: create,
-                update: update
-            }
-        };
-        //#region global vars
-        var people = 0;
-        var foodGroup;
-        const speed = 100;
-        const foodDecrementInterval = 5000;
-        const foodCreateInterval = 1000;
-        const reproduceOffset = 200;
-        const foodToReproduce = 10;
-        var foodCreateTime;
-        var i = 0;
-        var game = new Phaser.Game(config);
-        //#endregion 
+            };
+            //#region global vars
+            var game = new Phaser.Game(config);
+            var people = 0;
+            var foodGroup;
+            const speed = 100;
+            const foodDecrementInterval = 5000;
+            const reproduceOffset = 200;
+            const foodToReproduce = 10;
+            var foodCreateTime;
+            var i = 0;
+            //if anything needs canvas access, it needs to be in create. Hence the move of foodCreateInterval definition
+            var foodCreateInterval = 1500;
+            //#endregion 
 
-        //CUSTOM CLASSES HERE
-        class Person extends Phaser.Physics.Arcade.Sprite {
-            constructor(scene, x, y, thisFoodCount) {
-                super(scene, x, y, 'dude');
-                //PHYSICS ME
-                scene.sys.updateList.add(this);
-                scene.sys.displayList.add(this);
-                scene.physics.world.enableBody(this);
-                //Them vars them vars them varry vars
-                this.foodCount = thisFoodCount;
-                this.text = scene.add.text(this.x, this.y, this.foodCount);
-                this.foodDecrementTime = scene.time.now + foodDecrementInterval;
-            }
-            checkFood(time) {
-                if (time > this.foodDecrementTime) {
-                    this.foodCount -= 1;
-                    this.foodDecrementTime += foodDecrementInterval;
+            //CUSTOM CLASSES HERE
+            class Person extends Phaser.Physics.Arcade.Sprite {
+                //to enable text look in update and checkFood and constructor
+                constructor(scene, x, y, thisFoodCount) {
+                    super(scene, x, y, 'dude');
+                    //PHYSICS ME
+                    scene.sys.updateList.add(this);
+                    scene.sys.displayList.add(this);
+                    scene.physics.world.enableBody(this);
+                    //Them vars them vars them varry vars
+                    this.foodCount = thisFoodCount;
+                    // this.text = scene.add.text(this.x, this.y, this.foodCount);
+                    this.foodDecrementTime = scene.time.now + foodDecrementInterval;
                 }
-                if (this.foodCount <= 0) {
-                    this.disableBody(true, true);
-                    this.text.setText('');
-                }
-                if (this.foodCount >= foodToReproduce) {
-                    console.log(this.x)
-                    if (this.x > game.canvas.width / 2) {
-                        this.offsetDir = -1;
-                    } else { this.offsetDir = 1; }
+                checkFood(time) {
+                    if (time > this.foodDecrementTime) {
+                        this.foodCount -= 1;
+                        this.foodDecrementTime += foodDecrementInterval;
+                    }
+                    if (this.foodCount <= 0) {
+                        this.disableBody(true, true);
+                        // this.text.setText('');
+                    }
+                    if (this.foodCount >= foodToReproduce) {
+                        if (this.x > game.canvas.width / 2) {
+                            this.offsetDir = -1;
+                        } else { this.offsetDir = 1; }
 
-                    createPerson(this.x + (Math.min(game.canvas.width/4) * this.offsetDir), this.y, Math.floor(this.foodCount / 2));
-                    this.foodCount = Math.ceil(this.foodCount / 2);
+                        createPerson(this.x + (Math.min(game.canvas.width / 4) * this.offsetDir), this.y, Math.floor(this.foodCount / 2));
+                        this.foodCount = Math.ceil(this.foodCount / 2);
+                    }
                 }
-            }
-            update(time, delta) {
-                var foodsToCheck = foodGroup.children.entries.filter((child) => {
-                    return child.active === true;
-                })
-                let closestFood = foodsToCheck[0];
-                if (closestFood) {
-                    foodsToCheck.forEach((child) => {
-                        if (Phaser.Math.Distance.Between(this.x, this.y, child.x, child.y) < Phaser.Math.Distance.Between(this.x, this.y, closestFood.x, closestFood.y)) {
-                            closestFood = child
-                        }
+                update(time, delta) {
+                    var foodsToCheck = foodGroup.children.entries.filter((child) => {
+                        return child.active === true;
                     })
-                    this.setVelocity(
-                        Math.cos(Phaser.Math.Angle.Between(this.x, this.y, closestFood.x, closestFood.y)) * speed,
-                        Math.sin(Phaser.Math.Angle.Between(this.x, this.y, closestFood.x, closestFood.y)) * speed
-                    )
+                    let closestFood = foodsToCheck[0];
+                    if (closestFood) {
+                        foodsToCheck.forEach((child) => {
+                            if (Phaser.Math.Distance.Between(this.x, this.y, child.x, child.y) < Phaser.Math.Distance.Between(this.x, this.y, closestFood.x, closestFood.y)) {
+                                closestFood = child
+                            }
+                        })
+                        this.setVelocity(
+                            Math.cos(Phaser.Math.Angle.Between(this.x, this.y, closestFood.x, closestFood.y)) * speed,
+                            Math.sin(Phaser.Math.Angle.Between(this.x, this.y, closestFood.x, closestFood.y)) * speed
+                        )
+                    }
+                    else {
+                        this.setVelocity(0, 0);
+                    }
+                    // this.text.setText(this.foodCount);
+                    // this.text.setPosition(this.x + 10, this.y - 5);
+                    this.checkFood(time);
+                }
+
+            }
+
+            function preload() {
+                this.load.image('food', 'assets/health_pot.png');
+                this.load.image('dude', 'assets/hat-guy.png')
+            }
+            function create() {
+                //multiplier is to account for values as canvas stretches
+                foodCreateInterval *= (48000 / (game.canvas.width * game.canvas.height));
+
+                personGroup = this.physics.add.group({ runChildUpdate: true, classType: Person });
+
+                foodGroup = this.physics.add.group({
+                    defaultKey: 'food',
+                    classType: Phaser.Physics.Arcade.Sprite
+                });
+
+                //Colliders and such
+                this.physics.add.overlap(personGroup, foodGroup, collectFood, null, this);
+                this.physics.add.collider(personGroup, personGroup);
+                foodCreateTime = this.time.now + foodCreateInterval;
+                //set resize listener
+                this.scale.on('resize', resize, this);
+
+            }
+            function update() {
+                if (people < 1) {
+                    createPerson(...randomXY());
+                    people += 1;
+                }
+
+                createFood(this, this.time.now);
+            }
+
+            function collectFood(person, food) {
+                food.disableBody(true, true);
+                person.foodCount += 1;
+            }
+
+            function createFood(scene, time) {
+                if (time > foodCreateTime) {
+                    if (foodGroup.getFirstDead() !== null) {
+                        foodGroup.getFirstDead().enableBody(true, Phaser.Math.Between(0, 800), Phaser.Math.Between(0, 600), true, true)
+                    }
+                    else {
+                        foodGroup.create(...randomXY());
+                    }
+                    foodCreateTime += foodCreateInterval;
+                }
+            }
+
+            function createPerson(x, y, iFoodCount = 5) {
+                if (personGroup.getFirstDead() !== null) {
+                    let duder = personGroup.getFirstDead().enableBody(true, x, y, true, true);
+                    duder.foodCount = iFoodCount;
                 }
                 else {
-                    this.setVelocity(0, 0);
+                    personGroup.create(x, y, iFoodCount);
                 }
-                this.text.setText(this.foodCount);
-                this.text.setPosition(this.x + 10, this.y - 5);
-                this.checkFood(time);
             }
 
-        }
-
-        function preload() {
-            this.load.image('food', 'assets/health_pot.png');
-            this.load.image('dude', 'assets/hat-guy.png')
-        }
-        function create() {
-            personGroup = this.physics.add.group({ runChildUpdate: true, classType: Person });
-
-            foodGroup = this.physics.add.group({
-                defaultKey: 'food',
-                classType: Phaser.Physics.Arcade.Sprite
-            });
-
-            //Colliders and such
-            this.physics.add.overlap(personGroup, foodGroup, collectFood, null, this);
-            this.physics.add.collider(personGroup, personGroup);
-            foodCreateTime = this.time.now + foodCreateInterval;
-        }
-        function update() {
-            if (people < 1) {
-                createPerson(...randomXY());
-                people += 1;
+            function randomXY() {
+                return [Phaser.Math.Between(0, game.canvas.width), Phaser.Math.Between(0, game.canvas.height)];
             }
 
-            createFood(this, this.time.now);
-        }
+            function resize(gameSize, baseSize, displaySize, resolution) {
+                var width = gameSize.width;
+                var height = gameSize.height;
 
-        function collectFood(person, food) {
-            food.disableBody(true, true);
-            person.foodCount += 1;
-        }
-
-        function createFood(scene, time) {
-            if (time > foodCreateTime) {
-                if (foodGroup.getFirstDead() !== null) {
-                    foodGroup.getFirstDead().enableBody(true, Phaser.Math.Between(0, 800), Phaser.Math.Between(0, 600), true, true)
-                }
-                else {
-                    foodGroup.create(...randomXY());
-                }
-                foodCreateTime += foodCreateInterval;
+                this.cameras.resize(width, height);
             }
-        }
 
-        function createPerson(x, y, iFoodCount = 5) {
-            if (personGroup.getFirstDead() !== null) {
-                let duder = personGroup.getFirstDead().enableBody(true, x, y, true, true);
-                duder.foodCount = iFoodCount;
-            }
-            else {
-                personGroup.create(x, y, iFoodCount);
-            }
-        }
-
-        function randomXY() {
-            return [Phaser.Math.Between(0, game.canvas.width), Phaser.Math.Between(0, game.canvas.height)];
-        }
-    </script>
-</div>
+        </script>
+    </div>
 </body>
 
 </html>
