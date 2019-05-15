@@ -36,8 +36,9 @@
         var foodGroup;
         const speed = 100;
         const foodDecrementInterval = 5000;
-        const maxFoodCount = 2;
         const foodCreateInterval = 1000;
+        const reproduceOffset=200;
+        const foodToReproduce=10;
         var foodCreateTime;
         var i = 0;
         var game = new Phaser.Game(config);
@@ -64,6 +65,15 @@
                 if (this.foodCount <= 0) {
                     this.disableBody(true, true);
                     this.text.setText('');
+                }
+                if (this.foodCount>=foodToReproduce) {
+                    console.log(this.x)
+                    if(this.x>game.canvas.width/2) {
+                        this.offsetDir=-1;
+                    } else {this.offsetDir=1;}
+                    
+                    createPerson(this.x+(Math.min(reproduceOffset/*,game.canvas.width/4*/)*this.offsetDir),this.y,Math.floor(this.foodCount/2));
+                    this.foodCount=Math.ceil(this.foodCount/2);
                 }
             }
             update(time, delta) {
@@ -110,13 +120,8 @@
             foodCreateTime = this.time.now + foodCreateInterval;
         }
         function update() {
-            if (people < 2) {
+            if (people < 1) {
                 createPerson(...randomXY());
-                //     // var newPerson = personGroup.get();
-                //     // if (newPerson) 
-                //     //     person.enableBody(true, 100, 450, true, true)
-
-                //     // }
                 people += 1;
             }
 
@@ -143,6 +148,7 @@
         function createPerson(x,y,iFoodCount=5){
             if (personGroup.getFirstDead()!==null){
                 let duder= personGroup.getFirstDead().enableBody(true,x,y,true,true);
+                duder.foodCount=iFoodCount;
             } 
             else {
                 personGroup.create(x,y,iFoodCount);
