@@ -157,7 +157,7 @@
             function createFood(scene, time) {
                 if (time > foodCreateTime) {
                     if (foodGroup.getFirstDead() !== null) {
-                        foodGroup.getFirstDead().enableBody(true, Phaser.Math.Between(0, 800), Phaser.Math.Between(0, 600), true, true)
+                        foodGroup.getFirstDead().enableBody(true,...randomXY(), true, true)
                     }
                     else {
                         foodGroup.create(...randomXY());
