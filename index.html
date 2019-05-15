@@ -13,12 +13,26 @@
 </head>
 
 <body>
-
+    <div class="game-container">
     <script type="text/javascript">
+        //
+        //
+        //
+        //
+        //
+        //
+        //
+        //
+        //
+        //Dead space here
         var config = {
             type: Phaser.AUTO,
-            width: 800,
-            height: 600,
+            scale: {
+                parent:'game-container',
+                mode:Phaser.Scale.FIT,
+                width:800,
+                height:600
+            },
             physics: {
                 default: 'arcade',
                 arcade: {
@@ -37,8 +51,8 @@
         const speed = 100;
         const foodDecrementInterval = 5000;
         const foodCreateInterval = 1000;
-        const reproduceOffset=200;
-        const foodToReproduce=10;
+        const reproduceOffset = 200;
+        const foodToReproduce = 10;
         var foodCreateTime;
         var i = 0;
         var game = new Phaser.Game(config);
@@ -66,14 +80,14 @@
                     this.disableBody(true, true);
                     this.text.setText('');
                 }
-                if (this.foodCount>=foodToReproduce) {
+                if (this.foodCount >= foodToReproduce) {
                     console.log(this.x)
-                    if(this.x>game.canvas.width/2) {
-                        this.offsetDir=-1;
-                    } else {this.offsetDir=1;}
-                    
-                    createPerson(this.x+(Math.min(reproduceOffset/*,game.canvas.width/4*/)*this.offsetDir),this.y,Math.floor(this.foodCount/2));
-                    this.foodCount=Math.ceil(this.foodCount/2);
+                    if (this.x > game.canvas.width / 2) {
+                        this.offsetDir = -1;
+                    } else { this.offsetDir = 1; }
+
+                    createPerson(this.x + (Math.min(game.canvas.width/4) * this.offsetDir), this.y, Math.floor(this.foodCount / 2));
+                    this.foodCount = Math.ceil(this.foodCount / 2);
                 }
             }
             update(time, delta) {
@@ -107,13 +121,13 @@
             this.load.image('dude', 'assets/hat-guy.png')
         }
         function create() {
-            personGroup = this.physics.add.group({ runChildUpdate: true, classType:Person });
+            personGroup = this.physics.add.group({ runChildUpdate: true, classType: Person });
 
             foodGroup = this.physics.add.group({
                 defaultKey: 'food',
                 classType: Phaser.Physics.Arcade.Sprite
             });
-            
+
             //Colliders and such
             this.physics.add.overlap(personGroup, foodGroup, collectFood, null, this);
             this.physics.add.collider(personGroup, personGroup);
@@ -135,7 +149,7 @@
 
         function createFood(scene, time) {
             if (time > foodCreateTime) {
-                if (foodGroup.getFirstDead()!==null) {
+                if (foodGroup.getFirstDead() !== null) {
                     foodGroup.getFirstDead().enableBody(true, Phaser.Math.Between(0, 800), Phaser.Math.Between(0, 600), true, true)
                 }
                 else {
@@ -145,13 +159,13 @@
             }
         }
 
-        function createPerson(x,y,iFoodCount=5){
-            if (personGroup.getFirstDead()!==null){
-                let duder= personGroup.getFirstDead().enableBody(true,x,y,true,true);
-                duder.foodCount=iFoodCount;
-            } 
+        function createPerson(x, y, iFoodCount = 5) {
+            if (personGroup.getFirstDead() !== null) {
+                let duder = personGroup.getFirstDead().enableBody(true, x, y, true, true);
+                duder.foodCount = iFoodCount;
+            }
             else {
-                personGroup.create(x,y,iFoodCount);
+                personGroup.create(x, y, iFoodCount);
             }
         }
 
@@ -159,7 +173,7 @@
             return [Phaser.Math.Between(0, game.canvas.width), Phaser.Math.Between(0, game.canvas.height)];
         }
     </script>
-
+</div>
 </body>
 
 </html>
