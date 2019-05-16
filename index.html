@@ -53,6 +53,7 @@
             const foodDecrementInterval = 5000;
             const reproduceOffset = 200;
             const foodToReproduce = 10;
+            const maxAge=20000;
             var foodCreateTime;
             var i = 0;
             //if anything needs canvas access, it needs to be in create. Hence the move of foodCreateInterval definition
@@ -62,7 +63,7 @@
             //CUSTOM CLASSES HERE
             class Person extends Phaser.Physics.Arcade.Sprite {
                 //to enable text look in update and checkFood and constructor
-                constructor(scene, x, y, thisFoodCount) {
+                constructor(scene,x, y, thisFoodCount) {
                     super(scene, x, y, 'dude');
                     //PHYSICS ME
                     scene.sys.updateList.add(this);
@@ -72,6 +73,9 @@
                     this.foodCount = thisFoodCount;
                     // this.text = scene.add.text(this.x, this.y, this.foodCount);
                     this.foodDecrementTime = scene.time.now + foodDecrementInterval;
+                    this.deathTime=scene.time.now+maxAge;
+                    console.log(this.deathTime)
+                    this.dead=false;
                 }
                 checkFood(time) {
                     if (time > this.foodDecrementTime) {
@@ -87,11 +91,15 @@
                             this.offsetDir = -1;
                         } else { this.offsetDir = 1; }
 
-                        createPerson(this.x + (Math.min(game.canvas.width / 4) * this.offsetDir), this.y, Math.floor(this.foodCount / 2));
+                        createPerson(this.x + (Math.min(game.canvas.width / 4) * this.offsetDir), this.y, Math.floor(this.foodCount / 2),time);
                         this.foodCount = Math.ceil(this.foodCount / 2);
                     }
                 }
                 update(time, delta) {
+                    if(this.dead===true){
+                        return;
+                    }
+                    this.checkFood(time);
                     var foodsToCheck = foodGroup.children.entries.filter((child) => {
                         return child.active === true;
                     })
@@ -112,9 +120,13 @@
                     }
                     // this.text.setText(this.foodCount);
                     // this.text.setPosition(this.x + 10, this.y - 5);
-                    this.checkFood(time);
+                    if(time>=this.deathTime){
+                        console.log("My time is up!"+" "+time)
+                        this.disableBody(true,true);
+                        this.dead=true;
+                    }
                 }
-
+                
             }
 
 
@@ -147,7 +159,6 @@
                     createPerson(...randomXY());
                     people += 1;
                 }
-
                 createFood(this, this.time.now);
             }
 
@@ -156,7 +167,7 @@
                 person.foodCount += 1;
             }
 
-            function createFood(scene, time) {
+            function createFood(scene,time) {
                 if (time > foodCreateTime) {
                     if (foodGroup.getFirstDead() !== null) {
                         foodGroup.getFirstDead().enableBody(true,...randomXY(), true, true)
@@ -168,10 +179,12 @@
                 }
             }
 
-            function createPerson(x, y, iFoodCount = 5) {
+            function createPerson(x, y, iFoodCount = 5,time) {
                 if (personGroup.getFirstDead() !== null) {
                     let duder = personGroup.getFirstDead().enableBody(true, x, y, true, true);
                     duder.foodCount = iFoodCount;
+                    duder.dead=false;
+                    duder.deathTime=time+maxAge;
                 }
                 else {
                     personGroup.create(x, y, iFoodCount);
