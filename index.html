@@ -45,6 +45,10 @@
                     update: update
                 }
             };
+         
+
+            const debugDeath=false;
+
             //#region global vars
             var game = new Phaser.Game(config);
             var people = 0;
@@ -53,7 +57,7 @@
             const foodDecrementInterval = 5000;
             const reproduceOffset = 200;
             const foodToReproduce = 10;
-            const maxAge=20000;
+            const maxAge=40000;
             var foodCreateTime;
             var i = 0;
             //if anything needs canvas access, it needs to be in create. Hence the move of foodCreateInterval definition
@@ -74,7 +78,7 @@
                     // this.text = scene.add.text(this.x, this.y, this.foodCount);
                     this.foodDecrementTime = scene.time.now + foodDecrementInterval;
                     this.deathTime=scene.time.now+maxAge;
-                    console.log(this.deathTime)
+                    // console.log(this.deathTime)
                     this.dead=false;
                 }
                 checkFood(time) {
@@ -83,6 +87,7 @@
                         this.foodDecrementTime += foodDecrementInterval;
                     }
                     if (this.foodCount <= 0) {
+                        if(debugDeath){console.log("I starved!")}
                         this.disableBody(true, true);
                         // this.text.setText('');
                     }
@@ -121,7 +126,7 @@
                     // this.text.setText(this.foodCount);
                     // this.text.setPosition(this.x + 10, this.y - 5);
                     if(time>=this.deathTime){
-                        console.log("My time is up!"+" "+time)
+                        if(this.debugDeath){console.log("My time is up!"+" "+time)}
                         this.disableBody(true,true);
                         this.dead=true;
                     }
