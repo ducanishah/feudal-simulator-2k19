@@ -73,13 +73,9 @@
                     scene.sys.updateList.add(this);
                     scene.sys.displayList.add(this);
                     scene.physics.world.enableBody(this);
-                    //Them vars them vars them varry vars
-                    this.foodCount = thisFoodCount;
                     // this.text = scene.add.text(this.x, this.y, this.foodCount);
-                    this.foodDecrementTime = scene.time.now + foodDecrementInterval;
-                    this.deathTime=scene.time.now+maxAge;
-                    // console.log(this.deathTime)
-                    this.dead=false;
+                    
+                    this.setBaseVars(scene.time.now,thisFoodCount);
                 }
                 checkFood(time) {
                     if (time > this.foodDecrementTime) {
@@ -131,7 +127,14 @@
                         this.dead=true;
                     }
                 }
-                
+                setBaseVars(time,thisFoodCount){
+                    this.dead=false;
+                    this.deathTime=time+maxAge;
+                    this.foodDecrementTime=time+foodDecrementInterval;
+                    // console.log(this.deathTime)
+                    this.foodCount=thisFoodCount;
+                    return this;
+                }
             }
 
 
@@ -186,10 +189,7 @@
 
             function createPerson(x, y, iFoodCount = 5,time) {
                 if (personGroup.getFirstDead() !== null) {
-                    let duder = personGroup.getFirstDead().enableBody(true, x, y, true, true);
-                    duder.foodCount = iFoodCount;
-                    duder.dead=false;
-                    duder.deathTime=time+maxAge;
+                    let duder = personGroup.getFirstDead().setBaseVars(time,iFoodCount).enableBody(true, x, y, true, true);
                 }
                 else {
                     personGroup.create(x, y, iFoodCount);
