@@ -53,7 +53,7 @@
             var game = new Phaser.Game(config);
             var people = 0;
             var foodGroup;
-            const speed = 100;
+            const baseSpeed = 100;
             const foodDecrementInterval = 5000;
             const reproduceOffset = 200;
             const foodToReproduce = 10;
@@ -68,7 +68,7 @@
             //CUSTOM CLASSES HERE
             class Person extends Phaser.Physics.Arcade.Sprite {
                 //to enable text look in update and checkFood and constructor
-                constructor(scene, x, y, thisFoodCount) {
+                constructor(scene, x, y, thisFoodCount,parentSpeed) {
                     super(scene, x, y, 'dude');
                     //PHYSICS ME
                     scene.sys.updateList.add(this);
@@ -76,7 +76,7 @@
                     scene.physics.world.enableBody(this);
                     // this.text = scene.add.text(this.x, this.y, this.foodCount);
 
-                    this.setBaseVars(scene.time.now, thisFoodCount);
+                    this.setBaseVars(scene.time.now, thisFoodCount,parentSpeed);
                 }
                 checkFood(time) {
                     if (time > this.foodDecrementTime) {
@@ -93,7 +93,7 @@
                             this.offsetDir = -1;
                         } else { this.offsetDir = 1; }
 
-                        createPerson(this.x + (Math.min(game.canvas.width / 4) * this.offsetDir), this.y, Math.floor(this.foodCount / 2), time);
+                        createPerson(this.x + (Math.min(game.canvas.width / 4) * this.offsetDir), this.y, Math.floor(this.foodCount / 2), time,this.speed);
                         this.foodCount = Math.ceil(this.foodCount / 2);
                     }
                 }
@@ -113,8 +113,8 @@
                             }
                         })
                         this.setVelocity(
-                            Math.cos(Phaser.Math.Angle.Between(this.x, this.y, closestFood.x, closestFood.y)) * speed,
-                            Math.sin(Phaser.Math.Angle.Between(this.x, this.y, closestFood.x, closestFood.y)) * speed
+                            Math.cos(Phaser.Math.Angle.Between(this.x, this.y, closestFood.x, closestFood.y)) * this.speed,
+                            Math.sin(Phaser.Math.Angle.Between(this.x, this.y, closestFood.x, closestFood.y)) * this.speed
                         )
                     }
                     else {
@@ -128,11 +128,12 @@
                         this.dead = true;
                     }
                 }
-                setBaseVars(time, thisFoodCount) {
+                setBaseVars(time, thisFoodCount,parentSpeed) {
                     this.dead = false;
                     this.deathTime = time + maxAge;
                     this.foodDecrementTime = time + foodDecrementInterval;
                     // console.log(this.deathTime)
+                    this.speed=parentSpeed*(1+((Math.random()-0.5)/2));
                     this.foodCount = thisFoodCount;
                     return this;
                 }
@@ -188,12 +189,12 @@
                 }
             }
 
-            function createPerson(x, y, iFoodCount = 5, time) {
+            function createPerson(x, y, iFoodCount = 5, time,parentSpeed=baseSpeed) {
                 if (personGroup.getFirstDead() !== null) {
-                    let duder = personGroup.getFirstDead().setBaseVars(time, iFoodCount).enableBody(true, x, y, true, true);
+                    let duder = personGroup.getFirstDead().setBaseVars(time, iFoodCount,parentSpeed).enableBody(true, x, y, true, true);
                 }
                 else {
-                    personGroup.create(x, y, iFoodCount);
+                    personGroup.create(x, y, iFoodCount,parentSpeed);
                 }
             }
 
