@@ -45,19 +45,19 @@
                     update: update
                 }
             };
-         
 
-            const debugDeath=false;
+
+            const debugDeath = false;
 
             //#region global vars
             var game = new Phaser.Game(config);
             var people = 0;
             var foodGroup;
-            const speed = 100;
+            const baseSpeed = 100;
             const foodDecrementInterval = 5000;
             const reproduceOffset = 200;
             const foodToReproduce = 10;
-            const maxAge=40000;
+            const maxAge = 40000;
             var foodCreateTime;
             var i = 0;
             //if anything needs canvas access, it needs to be in create. Hence the move of foodCreateInterval definition
@@ -67,15 +67,15 @@
             //CUSTOM CLASSES HERE
             class Person extends Phaser.Physics.Arcade.Sprite {
                 //to enable text look in update and checkFood and constructor
-                constructor(scene,x, y, thisFoodCount) {
+                constructor(scene, x, y, thisFoodCount) {
                     super(scene, x, y, 'dude');
                     //PHYSICS ME
                     scene.sys.updateList.add(this);
                     scene.sys.displayList.add(this);
                     scene.physics.world.enableBody(this);
                     // this.text = scene.add.text(this.x, this.y, this.foodCount);
-                    
-                    this.setBaseVars(scene.time.now,thisFoodCount);
+
+                    this.setBaseVars(scene.time.now, thisFoodCount);
                 }
                 checkFood(time) {
                     if (time > this.foodDecrementTime) {
@@ -83,7 +83,7 @@
                         this.foodDecrementTime += foodDecrementInterval;
                     }
                     if (this.foodCount <= 0) {
-                        if(debugDeath){console.log("I starved!")}
+                        if (debugDeath) { console.log("I starved!") }
                         this.disableBody(true, true);
                         // this.text.setText('');
                     }
@@ -92,12 +92,12 @@
                             this.offsetDir = -1;
                         } else { this.offsetDir = 1; }
 
-                        createPerson(this.x + (Math.min(game.canvas.width / 4) * this.offsetDir), this.y, Math.floor(this.foodCount / 2),time);
+                        createPerson(this.x + (Math.min(game.canvas.width / 4) * this.offsetDir), this.y, Math.floor(this.foodCount / 2), time);
                         this.foodCount = Math.ceil(this.foodCount / 2);
                     }
                 }
                 update(time, delta) {
-                    if(this.dead===true){
+                    if (this.dead === true) {
                         return;
                     }
                     this.checkFood(time);
@@ -121,18 +121,18 @@
                     }
                     // this.text.setText(this.foodCount);
                     // this.text.setPosition(this.x + 10, this.y - 5);
-                    if(time>=this.deathTime){
-                        if(this.debugDeath){console.log("My time is up!"+" "+time)}
-                        this.disableBody(true,true);
-                        this.dead=true;
+                    if (time >= this.deathTime) {
+                        if (this.debugDeath) { console.log("My time is up!" + " " + time) }
+                        this.disableBody(true, true);
+                        this.dead = true;
                     }
                 }
-                setBaseVars(time,thisFoodCount){
-                    this.dead=false;
-                    this.deathTime=time+maxAge;
-                    this.foodDecrementTime=time+foodDecrementInterval;
+                setBaseVars(time, thisFoodCount) {
+                    this.dead = false;
+                    this.deathTime = time + maxAge;
+                    this.foodDecrementTime = time + foodDecrementInterval;
                     // console.log(this.deathTime)
-                    this.foodCount=thisFoodCount;
+                    this.foodCount = thisFoodCount;
                     return this;
                 }
             }
@@ -175,10 +175,10 @@
                 person.foodCount += 1;
             }
 
-            function createFood(scene,time) {
+            function createFood(scene, time) {
                 if (time > foodCreateTime) {
                     if (foodGroup.getFirstDead() !== null) {
-                        foodGroup.getFirstDead().enableBody(true,...randomXY(), true, true)
+                        foodGroup.getFirstDead().enableBody(true, ...randomXY(), true, true)
                     }
                     else {
                         foodGroup.create(...randomXY());
@@ -187,9 +187,9 @@
                 }
             }
 
-            function createPerson(x, y, iFoodCount = 5,time) {
+            function createPerson(x, y, iFoodCount = 5, time) {
                 if (personGroup.getFirstDead() !== null) {
-                    let duder = personGroup.getFirstDead().setBaseVars(time,iFoodCount).enableBody(true, x, y, true, true);
+                    let duder = personGroup.getFirstDead().setBaseVars(time, iFoodCount).enableBody(true, x, y, true, true);
                 }
                 else {
                     personGroup.create(x, y, iFoodCount);
