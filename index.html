@@ -53,15 +53,16 @@
             var game = new Phaser.Game(config);
             var people = 0;
             var foodGroup;
-            const baseSpeed = 100;
+            const speed = 100;
             const foodDecrementInterval = 5000;
             const reproduceOffset = 200;
             const foodToReproduce = 10;
             const maxAge = 40000;
             var foodCreateTime;
             var i = 0;
-            //if anything needs canvas access, it needs to be in create. Hence the move of foodCreateInterval definition
-            var foodCreateInterval = 2000;
+            //Interval needs to be set in both resize() and update(), hence variable usage
+            var foodCreateVariable=2000;
+            var foodCreateInterval;
             //#endregion 
 
             //CUSTOM CLASSES HERE
@@ -145,7 +146,7 @@
             }
             function create() {
                 //multiplier is to account for values as canvas stretches
-                foodCreateInterval *= (48000 / (game.canvas.width * game.canvas.height));
+                foodCreateInterval = foodCreateVariable * (48000 / (game.canvas.width * game.canvas.height));
 
                 personGroup = this.physics.add.group({ runChildUpdate: true, classType: Person });
 
@@ -203,7 +204,7 @@
             function resize(gameSize, baseSize, displaySize, resolution) {
                 var width = gameSize.width;
                 var height = gameSize.height;
-
+                foodCreateInterval = foodCreateVariable * (48000 / (width * height));
                 this.cameras.resize(width, height);
             }
 
