@@ -51,7 +51,7 @@
 
             //#region global vars
             var game = new Phaser.Game(config);
-            var people = 0;
+            var spawnCycles = 0;
             var foodGroup;
             const baseSpeed = 100;
             const foodDecrementInterval = 5000;
@@ -70,12 +70,7 @@
                 //to enable text look in update and checkFood and constructor
                 constructor(scene, x, y, thisFoodCount,parentSpeed) {
                     super(scene, x, y, 'dude');
-                    //PHYSICS ME
-                    scene.sys.updateList.add(this);
-                    scene.sys.displayList.add(this);
-                    scene.physics.world.enableBody(this);
                     // this.text = scene.add.text(this.x, this.y, this.foodCount);
-
                     this.setBaseVars(scene.time.now, thisFoodCount,parentSpeed);
                 }
                 checkFood(time) {
@@ -139,17 +134,29 @@
                 }
             }
 
+            class foodSpawner extends Phaser.Physics.Arcade.Sprite {
+                constructor (scene, x,y) {
+                    super (scene,x,y,'mushroom');
+                    this.setBaseVars(scene.time.now);
+                    this.depth=1;
+                }
+                setBaseVars(time){
+                    
+                }
+            }
 
             //IMAGES ARE LOADED HERE
             function preload() {
                 this.load.image('food', 'assets/health_pot.png');
-                this.load.image('dude', 'assets/hat-guy.png')
+                this.load.image('dude', 'assets/hat-guy.png');
+                this.load.image('mushroom','assets/mushroom.png');
             }
             function create() {
                 //multiplier is to account for values as canvas stretches
                 foodCreateInterval = foodCreateVariable * (48000 / (game.canvas.width * game.canvas.height));
 
                 personGroup = this.physics.add.group({ runChildUpdate: true, classType: Person });
+                foodSpawnerGroup=this.physics.add.group({runChildUpdate:true,classType:foodSpawner});
 
                 foodGroup = this.physics.add.group({
                     defaultKey: 'food',
@@ -165,9 +172,10 @@
 
             }
             function update() {
-                if (people < 1) {
+                if (spawnCycles < 1) {
                     createPerson(...randomXY());
-                    people += 1;
+                    createFoodSpawner(...randomXY())
+                    spawnCycles += 1;
                 }
                 createFood(this, this.time.now);
             }
@@ -189,12 +197,21 @@
                 }
             }
 
-            function createPerson(x, y, iFoodCount = 5, time,parentSpeed=baseSpeed) {
+            function createPerson(x, y, iFoodCount = 5, time, parentSpeed=baseSpeed) {
                 if (personGroup.getFirstDead() !== null) {
-                    let duder = personGroup.getFirstDead().setBaseVars(time, iFoodCount,parentSpeed).enableBody(true, x, y, true, true);
+                    personGroup.getFirstDead().setBaseVars(time, iFoodCount,parentSpeed).enableBody(true, x, y, true, true);
                 }
                 else {
                     personGroup.create(x, y, iFoodCount,parentSpeed);
+                }
+            }
+
+            function createFoodSpawner(x,y,time){
+                if (foodSpawnerGroup.getFirstDead() !== null) {
+                    foodSpawnerGroup.getFirstDead().setBaseVars(time).enableBody(true, x, y, true, true);
+                }
+                else {
+                    foodSpawnerGroup.create(x, y);
                 }
             }
 
