@@ -18,7 +18,7 @@
             //
             //TODO:
             //Maybe refactor all of the create functions to be centralized into one, with different arguments?
-            //Make the mushrooms spawn food
+            //
             //Make the people have a faster metabolism if they're faster
             //
             //
@@ -52,14 +52,14 @@
             var game = new Phaser.Game(config);
             var spawnCycles = 0;
             var foodGroup;
-            const baseSpeed = 100;
-            const foodDecrementInterval = 4000;
-            const reproduceOffset = 200;
+            const baseSpeed = 200;
+            const baseFoodDecrementInterval = 3000;
+            const reproduceOffset = 40;
             const foodToReproduce = 10;
-            const maxAge = 40000;
+            const maxAge = 20000;
             var _foodCreateTime;
             var i = 0;
-            var foodSpawnerCreateInterval=2000;
+            var foodSpawnerCreateFoodInterval=300;
             //Interval needs to be set in both resize() and update(), hence variable usage
             var foodCreateVariable=2000;
             var foodCreateInterval;
@@ -76,7 +76,7 @@
                 checkFood(time) {
                     if (time > this.foodDecrementTime) {
                         this.foodCount -= 1;
-                        this.foodDecrementTime += foodDecrementInterval;
+                        this.foodDecrementTime += baseFoodDecrementInterval;
                     }
                     if (this.foodCount <= 0) {
                         if (debugDeath) { console.log("I starved!") }
@@ -88,7 +88,7 @@
                             this.offsetDir = -1;
                         } else { this.offsetDir = 1; }
 
-                        createPerson(this.x + (Math.min(game.canvas.width / 4) * this.offsetDir), this.y, Math.floor(this.foodCount / 2), time,this.speed);
+                        createPerson(this.x + (Math.min(game.canvas.width / 4,reproduceOffset) * this.offsetDir), this.y, Math.floor(this.foodCount / 2), time,this.speed);
                         this.foodCount = Math.ceil(this.foodCount / 2);
                     }
                 }
@@ -126,22 +126,25 @@
                 setBaseVars(time, thisFoodCount,parentSpeed) {
                     this.dead = false;
                     this.deathTime = time + maxAge;
-                    this.foodDecrementTime = time + foodDecrementInterval;
-                    // console.log(this.deathTime)
                     this.speed=parentSpeed*(1+((Math.random()-0.5)/2));
+                    this.foodDecrementInterval=baseFoodDecrementInterval/((this.speed/baseSpeed)^2);
+                    this.foodDecrementTime = time + this.foodDecrementInterval;
+                    // console.log(this.deathTime)
                     this.foodCount = thisFoodCount;
+                    // console.log(`My speed is ${this.speed}\n My decrementInterval is ${this.foodDecrementInterval}`);
+
                     return this;
                 }
             }
 
-            class foodSpawner extends Phaser.Physics.Arcade.Sprite {
+            class FoodSpawner extends Phaser.Physics.Arcade.Sprite {
                 constructor (scene, x,y) {
                     super (scene,x,y,'mushroom');
                     this.setBaseVars(scene.time.now);
                     this.depth=1;
                 }
                 setBaseVars(time){
-                    this.foodCreateTime=time+foodSpawnerCreateInterval;
+                    this.foodCreateTime=time+foodSpawnerCreateFoodInterval;
                 }
                 update(time,delta){
                     this.checkFoodSpawn(time);
@@ -149,7 +152,7 @@
                 checkFoodSpawn(time){
                     if (time>this.foodCreateTime) {
                         let randomAngle=Math.random()*360;
-                        this.foodCreateTime+=foodSpawnerCreateInterval;
+                        this.foodCreateTime+=foodSpawnerCreateFoodInterval;
                         let newFoodCoords=[this.x+20*Math.cos(randomAngle),this.y+20*Math.sin(randomAngle)]
                         createFood(...newFoodCoords)
                     }
@@ -167,7 +170,7 @@
                 foodCreateInterval = foodCreateVariable * (48000 / (game.canvas.width * game.canvas.height));
 
                 personGroup = this.physics.add.group({ runChildUpdate: true, classType: Person });
-                foodSpawnerGroup=this.physics.add.group({runChildUpdate:true,classType:foodSpawner});
+                foodSpawnerGroup=this.physics.add.group({runChildUpdate:true,classType:FoodSpawner});
 
                 foodGroup = this.physics.add.group({
                     defaultKey: 'food',
@@ -208,7 +211,6 @@
                         foodGroup.create(x,y);
                     }
             }
-            
             function createPerson(x, y, iFoodCount = 5, time, parentSpeed=baseSpeed) {
                 if (personGroup.getFirstDead() !== null) {
                     personGroup.getFirstDead().setBaseVars(time, iFoodCount,parentSpeed).enableBody(true, x, y, true, true);
@@ -217,7 +219,6 @@
                     personGroup.create(x, y, iFoodCount,parentSpeed);
                 }
             }
-
             function createFoodSpawner(x,y,time){
                 if (foodSpawnerGroup.getFirstDead() !== null) {
                     foodSpawnerGroup.getFirstDead().setBaseVars(time).enableBody(true, x, y, true, true);
@@ -226,7 +227,6 @@
                     foodSpawnerGroup.create(x, y);
                 }
             }
-
             function randomXY() {
                 return [Phaser.Math.Between(0, game.canvas.width), Phaser.Math.Between(0, game.canvas.height)];
             }
