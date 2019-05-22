@@ -16,10 +16,10 @@
     <div id="game-container">
         <script type="text/javascript">
             //
-            //
-            //
-            //
-            //
+            //TODO:
+            //Maybe refactor all of the create functions to be centralized into one, with different arguments?
+            //Make the mushrooms spawn food
+            //Make the people have a faster metabolism if they're faster
             //
             //
             //
@@ -46,7 +46,6 @@
                 }
             };
 
-
             const debugDeath = false;
 
             //#region global vars
@@ -54,12 +53,13 @@
             var spawnCycles = 0;
             var foodGroup;
             const baseSpeed = 100;
-            const foodDecrementInterval = 5000;
+            const foodDecrementInterval = 4000;
             const reproduceOffset = 200;
             const foodToReproduce = 10;
             const maxAge = 40000;
-            var foodCreateTime;
+            var _foodCreateTime;
             var i = 0;
+            var foodSpawnerCreateInterval=2000;
             //Interval needs to be set in both resize() and update(), hence variable usage
             var foodCreateVariable=2000;
             var foodCreateInterval;
@@ -141,7 +141,18 @@
                     this.depth=1;
                 }
                 setBaseVars(time){
-                    
+                    this.foodCreateTime=time+foodSpawnerCreateInterval;
+                }
+                update(time,delta){
+                    this.checkFoodSpawn(time);
+                }
+                checkFoodSpawn(time){
+                    if (time>this.foodCreateTime) {
+                        let randomAngle=Math.random()*360;
+                        this.foodCreateTime+=foodSpawnerCreateInterval;
+                        let newFoodCoords=[this.x+20*Math.cos(randomAngle),this.y+20*Math.sin(randomAngle)]
+                        createFood(...newFoodCoords)
+                    }
                 }
             }
 
@@ -166,7 +177,7 @@
                 //Colliders and such
                 this.physics.add.overlap(personGroup, foodGroup, collectFood, null, this);
                 this.physics.add.collider(personGroup, personGroup);
-                foodCreateTime = this.time.now + foodCreateInterval;
+                _foodCreateTime = this.time.now + foodCreateInterval;
                 //set resize listener
                 this.scale.on('resize', resize, this);
 
@@ -177,7 +188,11 @@
                     createFoodSpawner(...randomXY())
                     spawnCycles += 1;
                 }
-                createFood(this, this.time.now);
+                if (this.time.now > _foodCreateTime) {
+                    createFood(...randomXY());
+                    _foodCreateTime += foodCreateInterval;
+                }
+                
             }
 
             function collectFood(person, food) {
@@ -185,18 +200,15 @@
                 person.foodCount += 1;
             }
 
-            function createFood(scene, time) {
-                if (time > foodCreateTime) {
+            function createFood(x,y) {
                     if (foodGroup.getFirstDead() !== null) {
-                        foodGroup.getFirstDead().enableBody(true, ...randomXY(), true, true)
+                        foodGroup.getFirstDead().enableBody(true,x,y, true, true)
                     }
                     else {
-                        foodGroup.create(...randomXY());
+                        foodGroup.create(x,y);
                     }
-                    foodCreateTime += foodCreateInterval;
-                }
             }
-
+            
             function createPerson(x, y, iFoodCount = 5, time, parentSpeed=baseSpeed) {
                 if (personGroup.getFirstDead() !== null) {
                     personGroup.getFirstDead().setBaseVars(time, iFoodCount,parentSpeed).enableBody(true, x, y, true, true);
