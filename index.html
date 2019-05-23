@@ -51,6 +51,7 @@
             //#region global vars
             var game = new Phaser.Game(config);
             var spawnCycles = 0;
+            var spawnGoals = 3;
             var foodGroup;
             const baseSpeed = 200;
             const baseFoodDecrementInterval = 3000;
@@ -76,7 +77,7 @@
                 checkFood(time) {
                     if (time > this.foodDecrementTime) {
                         this.foodCount -= 1;
-                        this.foodDecrementTime += baseFoodDecrementInterval;
+                        this.foodDecrementTime += this.foodDecrementInterval;
                     }
                     if (this.foodCount <= 0) {
                         if (debugDeath) { console.log("I starved!") }
@@ -127,11 +128,11 @@
                     this.dead = false;
                     this.deathTime = time + maxAge;
                     this.speed=parentSpeed*(1+((Math.random()-0.5)/2));
-                    this.foodDecrementInterval=baseFoodDecrementInterval/((this.speed/baseSpeed)^2);
+                    this.foodDecrementInterval=baseFoodDecrementInterval/(Math.pow((this.speed/baseSpeed),1.5));
                     this.foodDecrementTime = time + this.foodDecrementInterval;
                     // console.log(this.deathTime)
                     this.foodCount = thisFoodCount;
-                    // console.log(`My speed is ${this.speed}\n My decrementInterval is ${this.foodDecrementInterval}`);
+                    // console.log(`My decrementInterval is ${this.foodDecrementInterval}`);
 
                     return this;
                 }
@@ -179,14 +180,14 @@
 
                 //Colliders and such
                 this.physics.add.overlap(personGroup, foodGroup, collectFood, null, this);
-                this.physics.add.collider(personGroup, personGroup);
+                // this.physics.add.collider(personGroup, personGroup);
                 _foodCreateTime = this.time.now + foodCreateInterval;
                 //set resize listener
                 this.scale.on('resize', resize, this);
 
             }
             function update() {
-                if (spawnCycles < 1) {
+                if (spawnCycles < spawnGoals) {
                     createPerson(...randomXY());
                     createFoodSpawner(...randomXY())
                     spawnCycles += 1;
