@@ -97,6 +97,11 @@
                     if (this.dead === true) {
                         return;
                     }
+                    if (time >= this.deathTime) {
+                        if (this.debugDeath) { console.log("My time is up!" + " " + time) }
+                        this.disableBody(true, true);
+                        this.dead = true;
+                    }
                     this.checkFood(time);
                     var foodsToCheck = foodGroup.children.entries.filter((child) => {
                         return child.active === true;
@@ -118,11 +123,8 @@
                     }
                     // this.text.setText(this.foodCount);
                     // this.text.setPosition(this.x + 10, this.y - 5);
-                    if (time >= this.deathTime) {
-                        if (this.debugDeath) { console.log("My time is up!" + " " + time) }
-                        this.disableBody(true, true);
-                        this.dead = true;
-                    }
+                    // let agePercent=(time-this.deathTime)/maxAge;
+                    // this.setTintFill(32534*(agePercent))
                 }
                 setBaseVars(time, thisFoodCount,parentSpeed) {
                     this.dead = false;
