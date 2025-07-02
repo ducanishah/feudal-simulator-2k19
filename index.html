@@ -100,7 +100,9 @@
                     if(this.dead===true){
                         return;
                     }
+                    // metabolism/starvation
                     this.checkFood(time);
+                    // pursue nearest food
                     var foodsToCheck = foodGroup.children.entries.filter((child) => {
                         return child.active === true;
                     })
@@ -119,6 +121,7 @@
                     else {
                         this.setVelocity(0, 0);
                     }
+                    //end pursue nearest food
                     // this.text.setText(this.foodCount);
                     // this.text.setPosition(this.x + 10, this.y - 5);
                     if(time>=this.deathTime){
@@ -142,6 +145,7 @@
             function preload() {
                 this.load.image('food', 'assets/health_pot.png');
                 this.load.image('dude', 'assets/hat-guy.png')
+                this.load.image('sensei', 'assets/sensei.png')
             }
             function create() {
                 //multiplier is to account for values as canvas stretches
