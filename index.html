@@ -165,7 +165,18 @@
                 //set resize listener
                 this.scale.on('resize', resize, this);
 
+                // Add sensei
+                var sensei = this.add.sprite(game.canvas.width / 2, game.canvas.height / 2, 'sensei');
+
+                // Timed event to spawn food from sensei
+                this.time.addEvent({
+                    delay: foodCreateInterval,
+                    callback: spawnSenseiFood,
+                    callbackScope: this,
+                    loop: true
+                });
             }
+
             function update() {
                 if (people < 1) {
                     createPerson(...randomXY());
@@ -209,6 +220,29 @@
                 var height = gameSize.height;
 
                 this.cameras.resize(width, height);
+                // Reposition sensei on resize
+                sensei.setPosition(width / 2, height / 2);
+            }
+            
+            function spawnSenseiFood() {
+                // Count active food spawned by sensei
+                let count = foodGroup.children.entries.filter(f => f.active && f.spawnedBySensei).length;
+                if (count >= 10) return;
+
+                // Spawn food in a circle around sensei
+                let angle = Phaser.Math.DegToRad(Phaser.Math.Between(0, 360));
+                let radius = 50;
+                let x = sensei.x + Math.cos(angle) * radius;
+                let y = sensei.y + Math.sin(angle) * radius;
+
+                let food;
+                if (foodGroup.getFirstDead() !== null) {
+                    food = foodGroup.getFirstDead();
+                    food.enableBody(true, x, y, true, true);
+                } else {
+                    food = foodGroup.create(x, y);
+                }
+                food.spawnedBySensei = true;
             }
 
         </script>
