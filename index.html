@@ -53,12 +53,18 @@
             var game = new Phaser.Game(config);
             var people = 0;
             var foodGroup;
+            var senseiGroup;
+            var senseiFood = [];
             const speed = 100;
             const foodDecrementInterval = 5000;
             const reproduceOffset = 200;
             const foodToReproduce = 10;
             const maxAge=40000;
             var foodCreateTime;
+            var senseiSpawnTime;
+            const senseiSpawnInterval = 3000;
+            const maxSenseiFoodItems = 10;
+            const senseiSpawnRadius = 80;
             var i = 0;
             //if anything needs canvas access, it needs to be in create. Hence the move of foodCreateInterval definition
             var foodCreateInterval = 2000;
@@ -147,7 +153,8 @@
                 this.load.image('dude', 'assets/hat-guy.png')
                 this.load.image('sensei', 'assets/sensei.png')
             }
-            function create() {
+            
+             function create() {
                 //multiplier is to account for values as canvas stretches
                 foodCreateInterval *= (48000 / (game.canvas.width * game.canvas.height));
 
@@ -158,25 +165,44 @@
                     classType: Phaser.Physics.Arcade.Sprite
                 });
 
+                // Create sensei group and spawn sensei in center
+                senseiGroup = this.physics.add.group({
+                    defaultKey: 'sensei',
+                    classType: Phaser.Physics.Arcade.Sprite
+                });
+                
+                let centerX = game.canvas.width / 2;
+                let centerY = game.canvas.height / 2;
+                senseiGroup.create(centerX, centerY);
+
                 //Colliders and such
                 this.physics.add.overlap(personGroup, foodGroup, collectFood, null, this);
                 this.physics.add.collider(personGroup, personGroup);
                 foodCreateTime = this.time.now + foodCreateInterval;
+                senseiSpawnTime = this.time.now + senseiSpawnInterval;
                 //set resize listener
                 this.scale.on('resize', resize, this);
 
             }
+
             function update() {
                 if (people < 1) {
                     createPerson(...randomXY());
                     people += 1;
                 }
                 createFood(this, this.time.now);
+                createSenseiFood(this, this.time.now);
             }
 
             function collectFood(person, food) {
                 food.disableBody(true, true);
                 person.foodCount += 1;
+                
+                // Remove from sensei food tracking if it was sensei food
+                let index = senseiFood.indexOf(food);
+                if (index > -1) {
+                    senseiFood.splice(index, 1);
+                }
             }
 
             function createFood(scene,time) {
@@ -189,6 +215,36 @@
                     }
                     foodCreateTime += foodCreateInterval;
                 }
+            }
+            
+            function createSenseiFood(scene, time) {
+                if (time > senseiSpawnTime && senseiFood.length < maxSenseiFoodItems) {
+                    let sensei = senseiGroup.getFirstAlive();
+                    if (sensei) {
+                        // Generate random position in circle around sensei
+                        let angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
+                        let distance = Phaser.Math.FloatBetween(20, senseiSpawnRadius);
+                        let spawnX = sensei.x + Math.cos(angle) * distance;
+                        let spawnY = sensei.y + Math.sin(angle) * distance;
+                        
+                        // Keep spawn within canvas bounds
+                        spawnX = Phaser.Math.Clamp(spawnX, 0, game.canvas.width);
+                        spawnY = Phaser.Math.Clamp(spawnY, 0, game.canvas.height);
+                        
+                        let newFood;
+                        if (foodGroup.getFirstDead() !== null) {
+                            newFood = foodGroup.getFirstDead().enableBody(true, spawnX, spawnY, true, true);
+                        } else {
+                            newFood = foodGroup.create(spawnX, spawnY);
+                        }
+                        
+                        senseiFood.push(newFood);
+                    }
+                    senseiSpawnTime += senseiSpawnInterval;
+                }
+                
+                // Clean up dead food from tracking array
+                senseiFood = senseiFood.filter(food => food.active);
             }
 
             function createPerson(x, y, iFoodCount = 5,time) {
